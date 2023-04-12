@@ -6,10 +6,12 @@ eb = Eventbrite(os.environ.get('EVENTBRITE_TOKEN'))
 
 def get_attendees():
     resp = eb.get(f'/events/{EVENT_ID}/attendees/', {'expand': 'assigned_unit'})
-    # TODO: Handle pagination
     pagination, attendees = resp['pagination'], resp['attendees']
-
-    return attendees
+    yield attendees
+    while pagination['has_more_items']:
+        resp = eb.get(f'/events/{EVENT_ID}/attendees/', {'continuation': pagination['continuation']})
+        pagination, attendees = resp['pagination'], resp['attendees']
+        yield attendees
 
 def get_event_text():
     return eb.get_event(EVENT_ID)['name']['text']
