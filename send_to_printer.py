@@ -14,7 +14,7 @@ def download_ttf_font():
     """ Download TTF font from Boca printer """
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.connect((IP, PORT))
-        s.settimeout(1.5)
+        # s.settimeout(1.5) # cannot set this too short, it will cause send to time out too.
         logger.info('Connected to printer')
         s.sendall('<S7>'.encode())
         try:

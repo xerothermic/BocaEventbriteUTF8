@@ -13,7 +13,7 @@ logger.setLevel(logging.DEBUG)
                 help='Eventbrite Order ID.')
 @click.option('--dry-run', default=False, help='Dry run only, no printing.')
 @click.option('--first-N', default=0, help='Print first N tickets only.')
-@click.option('--ttf-font', default='TTF1', help='TTF font file on printer.', type=click.Choice(['TTF1', 'TTF2']))
+@click.option('--ttf-font', default='TTF1', help='TTF font file on printer.', type=click.Choice(['TTF1', 'TTF2', 'TTF3']))
 def main(event_id, order_id, dry_run, first_n, ttf_font):
     ebm = EventbriteManager()
     attendees = ebm.get_attendees_by_order_id(order_id)
