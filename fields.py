@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from attr import dataclass
 from datetime import datetime
 
@@ -9,7 +9,7 @@ class BocaSettings:
 
 @dataclass
 class BocaFields:
-    """ Fields for printing """
+    """ Fields for printing Eventbrite tickets on Boca printer """
     org_title: str
     event_title: str
     venue_title: str
@@ -87,7 +87,7 @@ def build_boca_fields(ev_detail, attendee, ttf_font='TTF1'):
         venue_addr=ev_detail.venue.address.localized_address_display,
         event_start_time=datetime.strptime(ev_detail.start.local, '%Y-%m-%dT%H:%M:%S'),
         event_end_time=datetime.strptime(ev_detail.end.local, '%Y-%m-%dT%H:%M:%S'),
-        price=attendee.costs.base_price.display,
+        price=attendee.costs.gross.display,
         attendee=attendee.profile.name,
         ticket_type=attendee.ticket_class_name,
         seat_detail=[': '.join(pair) for pair in attendee.assigned_unit.pairs],

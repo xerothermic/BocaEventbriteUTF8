@@ -7,14 +7,19 @@ logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-@click.command()
+@click.group()
+def cli():
+    pass
+
+@cli.command() # @cli, not @click!
 @click.option('--event_id', default=579945642027, help='Eventbrite Event ID for 傳統週.')
 @click.option('--order_id', prompt='Enter your order id',
                 help='Eventbrite Order ID.')
 @click.option('--dry-run', default=False, help='Dry run only, no printing.')
 @click.option('--first-N', default=0, help='Print first N tickets only.')
 @click.option('--ttf-font', default='TTF1', help='TTF font file on printer.', type=click.Choice(['TTF1', 'TTF2', 'TTF3']))
-def main(event_id, order_id, dry_run, first_n, ttf_font):
+def eventbrite(event_id, order_id, dry_run, first_n, ttf_font):
+    """ Print Eventbrite tickets """
     ebm = EventbriteManager()
     attendees = ebm.get_attendees_by_order_id(order_id)
     ev_detail = ebm.get_event_detail(event_id)
@@ -26,4 +31,4 @@ def main(event_id, order_id, dry_run, first_n, ttf_font):
             send_to_printer(bf)
 
 if __name__ == '__main__':
-    main()
+    cli()

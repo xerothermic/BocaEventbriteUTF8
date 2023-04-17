@@ -52,7 +52,7 @@ if __name__ == '__main__':
     event_detail['start'] = {'local': '2023-05-19T19:00:00'}
     event_detail['end'] = {'local': '2023-05-19T21:00:00'}
     attendee = {'profile': {'name': 'Bear Chen'},
-        'costs': {'base_price': {'display': '$30.00'}},
+        'costs': {'gross': {'display': '$30.00'}},
         'ticket_class_name': 'Standard Adults',
         'assigned_unit': {'pairs': [['Section', 'C'], ['Row', 'G'], ['Seat', '107']]},
         'order_id': 6371643849,
