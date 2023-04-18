@@ -5,7 +5,6 @@ import os
 
 from data_model import gen_obj
 
-logging.basicConfig()
 logger = logging.getLogger(__name__)
 
 class EventbriteManager(object):
@@ -55,11 +54,13 @@ class EventbriteManager(object):
         return gen_obj(self._conn.get(f'/events/{event_id}/', {'expand': 'venue'}))
 
 if __name__ == "__main__":
+    logging.basicConfig()
+
     EVENT_ID = 579945642027
     ebm = EventbriteManager()
     attendees = ebm.get_attendees_by_event_id(EVENT_ID)
     for p in attendees:
-        print(p.profile.name, p.id, p.order_id, p.barcodes[0].status, p.barcodes[0].barcode, p.barcodes[0].is_printed, p.assigned_unit.pairs)
+        logger.debug(p.profile.name, p.id, p.order_id, p.barcodes[0].status, p.barcodes[0].barcode, p.barcodes[0].is_printed, p.assigned_unit.pairs)
 
     event = ebm.get_event_detail(EVENT_ID)
-    print(event.name.text, event.start.local, event.end.local, event.venue.address.localized_address_display)
+    logger.debug(event.name.text, event.start.local, event.end.local, event.venue.address.localized_address_display)

@@ -1,9 +1,7 @@
+import logging
 import socket
-from datetime import datetime
 from fields import BocaFields, build_boca_fields
 
-import logging
-logging.basicConfig()
 logger = logging.getLogger(__name__)
 
 # IP = '192.168.55.186'
@@ -42,11 +40,13 @@ def send_to_printer(fields: BocaFields):
     """ Send fields to Boca printer """
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.connect((IP, PORT))
-        print('Connected to printer')
+        logger.info('Connected to printer')
         sent = s.sendall(f'{fields}'.encode())
-        print(f'Printed {fields=}')
+        logger.info(f'Printed {fields=}')
 
 if __name__ == '__main__':
+    logging.basicConfig()
+
     event_detail = {'name': {'text': 'Taiwan Reminiscence by Taiwan Acrobatic Troup 【台灣追想曲】台灣特技團'}}
     event_detail['venue'] = {'name': 'Meydenbauer Center', 'address': {'localized_address_display': '11100 Northeast 6th Street, Belleveue, WA 98004'}}
     event_detail['start'] = {'local': '2023-05-19T19:00:00'}
@@ -59,5 +59,5 @@ if __name__ == '__main__':
         'barcodes': [{'barcode': 637164384910378220589001}]}
     bf = build_boca_fields(gen_obj(event_detail), gen_obj(attendee))
     
-    print("Sending:", bf," to printer ", IP, ":", PORT)
+    logger.info("Sending:", bf," to printer ", IP, ":", PORT)
     send_to_printer(bf)
