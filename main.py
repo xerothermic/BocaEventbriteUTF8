@@ -27,8 +27,7 @@ def cli(debug):
 @click.option('--dry-run', is_flag=True, default=False, help='Dry run only, no printing.')
 @click.option('--first-N', default=0, help='Print first N tickets only.')
 @click.option('--ttf-font', default='TTF1', help='TTF font file on printer.', type=click.Choice(['TTF1', 'TTF2', 'TTF3']))
-@click.option('--org-title', default='Taiwanese Association of Greater Seattle 西雅圖台灣同鄉會', help='Organization name.')
-def eventbrite(order_id, dry_run, first_n, ttf_font, org_title):
+def eventbrite(order_id, dry_run, first_n, ttf_font):
     """ Print Eventbrite tickets """
     ebm = EventbriteManager()
     attendees = ebm.get_attendees_by_order_id(order_id)
@@ -37,7 +36,6 @@ def eventbrite(order_id, dry_run, first_n, ttf_font, org_title):
         logger.error(f"Order {order_id} does not exist.")
         return
     ev_detail = ebm.get_event_detail(attendee1.event_id)
-    ev_detail.org_title = org_title
     for idx, p in enumerate(attendees):
         ticket_class_detail = ebm.get_ticket_class_detail(p.event_id, p.ticket_class_id)
         logger.debug(ticket_class_detail)

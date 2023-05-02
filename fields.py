@@ -95,7 +95,7 @@ class BocaFields:
 
 def build_boca_fields(ev_detail, attendee, ttf_font='TTF1'):
     return BocaFields(
-        org_title=ev_detail.org_title,
+        org_title=ev_detail.organizer.name,
         event_title=ev_detail.name.text,
         venue_title=ev_detail.venue.name,
         venue_addr=ev_detail.venue.address.localized_address_display,

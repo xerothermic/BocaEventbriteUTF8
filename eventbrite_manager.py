@@ -51,7 +51,7 @@ class EventbriteManager(object):
             yield from map(gen_obj, attendees)
 
     def get_event_detail(self, event_id: int):
-        return gen_obj(self._conn.get(f'/events/{event_id}/', {'expand': 'venue'}))
+        return gen_obj(self._conn.get(f'/events/{event_id}/', {'expand': 'venue,organizer'}))
 
     def get_ticket_class_detail(self, event_id: int, ticket_class_id: int):
         return gen_obj(self._conn.get_event_ticket_class_by_id(event_id, ticket_class_id))
