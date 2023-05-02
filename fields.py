@@ -19,6 +19,7 @@ class BocaFields:
     price: str
     attendee: str
     ticket_type: str
+    ticket_description: str
     seat_detail: List[str]
     ticket_id: int
     barcode: int
@@ -61,6 +62,11 @@ class BocaFields:
         roff += 50
         strings.append(f"<RC{roff},{coff}>{self.ticket_type}{', ' if self.seat_detail else ''}{', '.join(self.seat_detail)}")
 
+        if self.ticket_description:
+            coff = 235
+            roff = 390
+            strings.append(f"<RC{roff},{coff}><{ttf},8>{self.ticket_description}")
+
         # start again from the top row
         roff = 0
         coff = 1200
@@ -98,6 +104,7 @@ def build_boca_fields(ev_detail, attendee, ttf_font='TTF1'):
         price=attendee.costs.gross.display,
         attendee=attendee.profile.name,
         ticket_type=attendee.ticket_class_name,
+        ticket_description=attendee.ticket_description,
         seat_detail=[': '.join(pair) for pair in attendee.assigned_unit.pairs],
         ticket_id=attendee.order_id,
         barcode=attendee.barcodes[0].barcode,

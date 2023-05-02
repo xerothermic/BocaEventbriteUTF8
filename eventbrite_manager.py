@@ -53,6 +53,9 @@ class EventbriteManager(object):
     def get_event_detail(self, event_id: int):
         return gen_obj(self._conn.get(f'/events/{event_id}/', {'expand': 'venue'}))
 
+    def get_ticket_class_detail(self, event_id: int, ticket_class_id: int):
+        return gen_obj(self._conn.get_event_ticket_class_by_id(event_id, ticket_class_id))
+
 if __name__ == "__main__":
     logging.basicConfig()
 
