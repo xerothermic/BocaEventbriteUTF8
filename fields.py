@@ -59,7 +59,7 @@ class BocaFields:
         roff += 75
         strings.append(f"<RC{roff},{coff}><{ttf},8>{self.attendee}")
         roff += 50
-        strings.append(f"<RC{roff},{coff}>{self.ticket_type}, {', '.join(self.seat_detail)}")
+        strings.append(f"<RC{roff},{coff}>{self.ticket_type}{', ' if self.seat_detail else ''}{', '.join(self.seat_detail)}")
 
         # start again from the top row
         roff = 0
@@ -67,8 +67,16 @@ class BocaFields:
         strings.append(f"<RC{roff},{coff}><F3>#{self.ticket_id}")
         coff += 300
         strings.append(f"<RC{roff},{coff}>#{self.ticket_id}")
-        roff += 50
-        strings.append(f"<RC{roff},{coff}>{self.ticket_type}")
+
+        # print ticket type in one line (<=17 characters)
+        if len(self.ticket_type) > 17:
+            for token in self.ticket_type.split():
+                roff += 30
+                strings.append(f"<RC{roff},{coff}>{token}")
+        else:
+            roff += 50
+            strings.append(f"<RC{roff},{coff}>{self.ticket_type}")
+
         for token in self.seat_detail:
             roff += 50
             strings.append(f"<RC{roff},{coff}>{token}")
@@ -81,7 +89,7 @@ class BocaFields:
 
 def build_boca_fields(ev_detail, attendee, ttf_font='TTF1'):
     return BocaFields(
-        org_title='Taiwanese Association of Greater Seattle 西雅圖台灣同鄉會',
+        org_title=ev_detail.org_title,
         event_title=ev_detail.name.text,
         venue_title=ev_detail.venue.name,
         venue_addr=ev_detail.venue.address.localized_address_display,
