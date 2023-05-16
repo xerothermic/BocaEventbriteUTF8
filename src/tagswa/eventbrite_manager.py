@@ -1,7 +1,11 @@
+from datetime import datetime
 import sys
+from typing import Iterator
 from eventbrite import Eventbrite
 import logging
 import os
+from types import SimpleNamespace
+from tagswa.abstraction.eventbrite import CommonEventFields
 
 from data_model import gen_obj
 
@@ -30,7 +34,7 @@ class EventbriteManager(object):
     def _get_attendee_by_id(self, event_id, attendee_id):
         return self._conn.get(f'/events/{event_id}/attendees/{attendee_id}/', {'expand': 'assigned_unit'})
 
-    def get_attendees_by_order_id(self, order_id: int, unused_only: bool = True):
+    def get_attendees_by_order_id(self, order_id: int, unused_only: bool = True) -> Iterator[SimpleNamespace]:
         resp = self._conn.get(f'/orders/{order_id}/', {'expand': 'attendees'})
         if 'attendees' not in resp: # type: ignore
             return []
@@ -51,7 +55,15 @@ class EventbriteManager(object):
             yield from map(gen_obj, attendees)
 
     def get_event_detail(self, event_id: int):
-        return gen_obj(self._conn.get(f'/events/{event_id}/', {'expand': 'venue,organizer'}))
+        resp = gen_obj(self._conn.get(f'/events/{event_id}/', {'expand': 'venue,organizer'}))
+        return CommonEventFields(
+            org_title=resp.organizer.name,
+            event_title=resp.name.text,
+            venue_title=resp.venue.name,
+            venue_addr=resp.venue.address.localized_address_display,
+            event_start_datetime=datetime.strptime(resp.start.local, '%Y-%m-%dT%H:%M:%S'),
+            event_end_datetime=datetime.strptime(resp.end.local, '%Y-%m-%dT%H:%M:%S'),
+        )
 
     def get_ticket_class_detail(self, event_id: int, ticket_class_id: int):
         return gen_obj(self._conn.get_event_ticket_class_by_id(event_id, ticket_class_id))
