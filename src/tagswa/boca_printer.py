@@ -1,6 +1,7 @@
 import logging
 import socket
 from tagswa.abstraction.ticket import Ticket
+from tagswa.abstraction.boca import Boca
 
 logger = logging.getLogger(__name__)
 
@@ -8,7 +9,12 @@ class BocaTcpRespError(Exception):
     """ Represent Boca printer tcp response error """
     pass
 
-class BocaTcpPrinter:
+class BocaNullPrinter(Boca):
+    """ For simulation """
+    def print(self, fgl_script: str):
+        logger.info(f"Received:{fgl_script}")
+
+class BocaTcpPrinter(Boca):
     """ Implemented a Boca printer via TCP interface """
     def __init__(self, ip='10.0.0.192', port=9100):
         self._sock = self._open_socket(ip, port)

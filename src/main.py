@@ -4,14 +4,15 @@ import click
 
 from tagswa.acrobatic_ticket import TaiwanAcrobaticTroupeTicket
 from tagswa.eventbrite_manager import EventbriteManager
-from tagswa.boca_printer import BocaTcpPrinter
+from tagswa.boca_printer import BocaTcpPrinter, BocaNullPrinter
 
 logger = logging.getLogger(__name__)
 
 def configure_root_logger(logging_level=logging.INFO):
     """ Initialize root logger """
     root_logger = logging.getLogger()
-    formatter = logging.Formatter('%(asctime)s %(filename)s %(funcName)s:%(lineno)d - %(levelname)s - %(message)s')
+    formatter = logging.Formatter(
+        '%(asctime)s %(filename)s %(funcName)s:%(lineno)d - %(levelname)s - %(message)s')
     handler = logging.StreamHandler()
     handler.setFormatter(formatter)
     root_logger.addHandler(handler)
@@ -45,19 +46,27 @@ def eventbrite(order_id, dry_run, first_n, ttf_font):
         logger.error(f"Order {order_id} does not exist.")
         return
     common_event_fields = ebm.get_event_detail(attendee1.event_id)
-    printer = BocaTcpPrinter()
+    printer = _setup_boca_printer(dry_run)
+
     for idx, p in enumerate(attendees):
         ticket_class_detail = ebm.get_ticket_class_detail(p.event_id, p.ticket_class_id)
         logger.debug(ticket_class_detail)
         p.ticket_description = ticket_class_detail.description
         if p.event_id == TaiwanAcrobaticTroupeTicket.EVENTID:
-            ticket = TaiwanAcrobaticTroupeTicket(p, common_event_fields)
+            ticket = TaiwanAcrobaticTroupeTicket(p, common_event_fields, ttf_font)
         else:
             raise ValueError(f"Don't know how to create ticket for {p.event_id=}")
         # logger.debug(f"{idx=}:{bf}")
-        if not dry_run and (first_n == 0 or idx < first_n):
+        if first_n == 0 or idx < first_n:
             logger.info(f"Sending {idx} to printer")
             printer.print(ticket.build_boca_script())
+
+def _setup_boca_printer(dry_run):
+    if dry_run:
+        printer = BocaNullPrinter()
+    else:
+        printer = BocaTcpPrinter()
+    return printer
 
 if __name__ == '__main__':
     cli()

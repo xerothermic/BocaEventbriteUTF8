@@ -1,9 +1,5 @@
-import abc
+from dataclasses import dataclass
 from datetime import datetime
-from attr import dataclass
-
-class EventFields(abc.ABC):
-    pass
 
 @dataclass
 class CommonEventFields:
