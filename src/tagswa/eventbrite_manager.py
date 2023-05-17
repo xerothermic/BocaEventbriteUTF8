@@ -19,10 +19,10 @@ class EventbriteManager(object):
 
     def _unused_only(self, unused_only: bool, attendee: dict) -> bool:
         return not unused_only or attendee['barcodes'][0]['status'] == 'unused'
-    
+
     def _filter_unused_attendees(self, unused_only: bool, attendees: list) -> list:
         return filter(lambda p: self._unused_only(unused_only, p), attendees)
-    
+
     def _map_attendees_with_assigned_units(self, attendees: list) -> list:
         return map(lambda p: self._get_attendee_by_id(p['event_id'], p['id']), attendees)
 
