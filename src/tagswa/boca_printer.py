@@ -29,6 +29,18 @@ class BocaTcpPrinter(Boca):
         self._sock.sendall(fgl_script.encode())
         logger.info(f'Printed {fgl_script}')
 
+    def download_logo(self, logo_file_path: str):
+        """ download 1-bit bmp logo to Boca printer """
+        with open(logo_file_path, 'rb') as fp:
+            logo = fp.read()
+            logger.info(f'{logo_file_path=} contain {len(logo)} bytes.')
+            print(f'{logo_file_path=} contain {len(logo)} bytes.')
+
+            esc = chr(27).encode()
+            self._sock.sendall(esc + f'<bmp><G{len(logo)}>'.encode()+logo + esc)
+
+        print('Done')
+
     def download_ttf_font(self, ttf_file_path: str, file_id: int):
         """ download TTF font to Boca printer """
         space_before = self._get_download_space_avail()

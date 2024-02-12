@@ -3,6 +3,7 @@ import logging
 import click
 
 from tagswa.acrobatic_ticket import TaiwanAcrobaticTroupeTicket
+from tagswa.summer_picnic_ticket import SummerPicnic2023Ticket
 from tagswa.eventbrite_manager import EventbriteManager
 from tagswa.boca_printer import BocaTcpPrinter, BocaNullPrinter
 
@@ -54,6 +55,11 @@ def eventbrite(order_id, dry_run, first_n, ttf_font):
         p.ticket_description = ticket_class_detail.description
         if p.event_id == TaiwanAcrobaticTroupeTicket.EVENTID:
             ticket = TaiwanAcrobaticTroupeTicket(p, common_event_fields, ttf_font)
+        elif p.event_id == SummerPicnic2023Ticket.EVENTID:
+            if int(p.barcodes[0].barcode) >= 733198138911988989009001:
+                ticket = SummerPicnic2023Ticket(p, common_event_fields, ttf_font)
+            else:
+                continue
         else:
             raise ValueError(f"Don't know how to create ticket for {p.event_id=}")
         # logger.debug(f"{idx=}:{bf}")
