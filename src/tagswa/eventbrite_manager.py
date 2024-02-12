@@ -37,6 +37,7 @@ class EventbriteManager(object):
     def get_attendees_by_order_id(self, order_id: int, unused_only: bool = True) -> Iterator[SimpleNamespace]:
         resp = self._conn.get(f'/orders/{order_id}/', {'expand': 'attendees'})
         if 'attendees' not in resp: # type: ignore
+            logger.warning('attendee is empty')
             return []
 
         attendees = self._filter_unused_attendees(unused_only, resp['attendees']) # type: ignore
