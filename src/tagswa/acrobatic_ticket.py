@@ -1,6 +1,7 @@
 import re
 from types import SimpleNamespace
 import logging
+from typing import List
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +24,7 @@ class TaiwanAcrobaticTroupeTicket(Ticket):
     def _missing_required_fields(ns: SimpleNamespace):
         return False
 
-    def _gen_fgl_script_from_ns(self):
+    def _gen_fgl_script_from_ns(self) -> List[str]:
         strings = []
         logger.debug("_place_org_title")
         self._place_org_title(strings)
@@ -31,7 +32,7 @@ class TaiwanAcrobaticTroupeTicket(Ticket):
         self._place_venue_info(strings)
         self._place_event_time(strings)
         self._place_price(strings)
-        self._place_attendee_name(strings)
+        #self._place_attendee_name(strings)
         self._place_seat_details_long(strings)
         self._place_ticket_description(strings)
         self._place_order_id(strings)

@@ -81,6 +81,6 @@ def test_acrobatic_ticket_layout_null():
 
     fgl_str = ticket.build_boca_script()
     print(fgl_str)
-    # printer = BocaTcpPrinter()
-    printer = BocaNullPrinter()
+    printer = BocaTcpPrinter()
+    # printer = BocaNullPrinter()
     printer.print(fgl_str)
