@@ -56,6 +56,7 @@ def eventbrite(order_id, include_used, dry_run, first_n, skip_n, ttf_font):
     if first_n:
         logger.info(f"{first_n=}")
         attendees = [next(attendees) for _ in range(first_n)]
+        attendees = iter(attendees)
     if skip_n:
         logger.info(f"{skip_n=}")
         [next(attendees) for _ in range(skip_n)]
