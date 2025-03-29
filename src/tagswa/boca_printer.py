@@ -50,24 +50,18 @@ class BocaTcpPrinter(Boca):
         with open(ttf_file_path, 'rb') as fp:
             ttf_font = fp.read()
             logger.info('Loaded TTF font to memory')
-            self._sock.sendall(f'<ID{file_id}><ttf{len(ttf_font)}>'.encode()+ttf_font)
+            self._sock.sendall(
+                f'<ID{file_id}><ttf{len(ttf_font)}>'.encode()+ttf_font)
 
         space_after = self._get_download_space_avail()
-        logger.info(f'Downloaded TTF font. Before/After spaces: {space_before}/{space_after}')
+        logger.info(
+            f'Downloaded TTF font. Before/After spaces: {space_before} -> {space_after}')
 
     def _get_download_space_avail(self) -> str:
         """ Return bytes available on Boca storage """
-        orig_timeout_val = self._sock.gettimeout()
-        logger.debug(f"Original socket timeout value:{orig_timeout_val}")
-        # Shorten the timeout value to improve responsiveness
-        self._sock.settimeout(1.5)
-        self._sock.sendall('<S7>'.encode())
-        resp = []
-        try:
-            while True:
-                ch = self._sock.recv(1)
-                resp.append(ch)
-        except socket.timeout:
-            pass
-
-        return ''.join(resp)
+        xmit_bytes = self._sock.send('<S7>'.encode())
+        if xmit_bytes != 4:
+            logger.error(
+                'Transmitting <S7> but only {xmit_bytes=} went through')
+        resp = self._sock.recvmsg(32)
+        return resp[0]
