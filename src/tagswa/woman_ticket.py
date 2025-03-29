@@ -1,7 +1,7 @@
 import logging
 from typing import List
 
-from tagswa.acrobatic_ticket import TaiwanAcrobaticTroupeTicket
+from tagswa.meydenbauer_ticket import TaiwanAcrobaticTroupeTicket
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +17,7 @@ class WomanTicket(TaiwanAcrobaticTroupeTicket):
         self._place_event_title(strings)
         self._place_venue_info(strings)
         self._place_event_time(strings)
-        #self._place_price(strings)
+        # self._place_price(strings)
         self._place_attendee_name(strings)
         # self._place_seat_details_long(strings)
         self._place_ticket_description(strings)

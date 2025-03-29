@@ -3,8 +3,7 @@ import logging
 import click
 
 from tagswa.woman_ticket import WomanTicket
-from tagswa.foca_ticket import CircusArtTicket
-from tagswa.acrobatic_ticket import TaiwanAcrobaticTroupeTicket
+from tagswa.meydenbauer_ticket import TaiwanAcrobaticTroupeTicket, CircusArtTicket, TaiwanPulseTicket
 from tagswa.summer_picnic_ticket import SummerPicnic2023Ticket
 from tagswa.eventbrite_manager import EventbriteManager
 from tagswa.boca_printer import BocaTcpPrinter, BocaNullPrinter
@@ -76,6 +75,8 @@ def eventbrite(order_id, include_used, dry_run, first_n, skip_n, ttf_font):
                 p, common_event_fields, ttf_font)
         elif p.event_id == CircusArtTicket.EVENTID:
             ticket = CircusArtTicket(p, common_event_fields, ttf_font)
+        elif p.event_id == TaiwanPulseTicket.EVENTID:
+            ticket = TaiwanPulseTicket(p, common_event_fields, ttf_font)
         elif p.event_id == SummerPicnic2023Ticket.EVENTID:
             if int(p.barcodes[0].barcode) >= 733198138911988989009001:
                 ticket = SummerPicnic2023Ticket(
