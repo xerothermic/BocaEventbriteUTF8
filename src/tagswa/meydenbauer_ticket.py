@@ -1,3 +1,5 @@
+from tagswa.abstraction.ticket import Ticket
+from tagswa.abstraction.eventbrite import CommonEventFields
 import re
 from types import SimpleNamespace
 import logging
@@ -5,8 +7,6 @@ from typing import List
 
 logger = logging.getLogger(__name__)
 
-from tagswa.abstraction.eventbrite import CommonEventFields
-from tagswa.abstraction.ticket import Ticket
 
 class TaiwanAcrobaticTroupeTicket(Ticket):
     """ 傳統週特技團 """
@@ -32,7 +32,7 @@ class TaiwanAcrobaticTroupeTicket(Ticket):
         self._place_venue_info(strings)
         self._place_event_time(strings)
         self._place_price(strings)
-        #self._place_attendee_name(strings)
+        # self._place_attendee_name(strings)
         self._place_seat_details_long(strings)
         self._place_ticket_description(strings)
         self._place_order_id(strings)
@@ -54,11 +54,13 @@ class TaiwanAcrobaticTroupeTicket(Ticket):
         strings.append("<HW2,2><SP275,1250><LD9>")
 
     def _place_barcode(self, strings):
-        strings.append("<RC265,1500><QR5>"+"{"+str(self._ns.barcodes[0].barcode)+"}")
+        strings.append("<RC265,1500><QR5>" +
+                       "{"+str(self._ns.barcodes[0].barcode)+"}")
         strings.append(f"<RC505,1500><F2>{self._ns.barcodes[0].barcode}")
 
     def _place_seat_details_short(self, strings):
-        seat_detail=[': '.join(pair) for pair in self._ns.assigned_unit.pairs]
+        seat_detail = [': '.join(pair)
+                       for pair in self._ns.assigned_unit.pairs]
         roff = 100
         for token in seat_detail:
             roff += 35
@@ -81,11 +83,13 @@ class TaiwanAcrobaticTroupeTicket(Ticket):
         if not self._ns.ticket_description:
             return
 
-        strings.append(f"<RC390,235><{self._ttf_font},8>{self._ns.ticket_description}")
+        strings.append(
+            f"<RC390,235><{self._ttf_font},8>{self._ns.ticket_description}")
 
     def _place_seat_details_long(self, strings):
         """ Seat details on the long side (attendee keeps) """
-        seat_detail=[': '.join(pair) for pair in self._ns.assigned_unit.pairs]
+        seat_detail = [': '.join(pair)
+                       for pair in self._ns.assigned_unit.pairs]
         strings.append("<RC490,65>{0}{1}{2}".format(
             self._ns.ticket_class_name,
             ', ' if seat_detail else '',
@@ -93,7 +97,8 @@ class TaiwanAcrobaticTroupeTicket(Ticket):
         ))
 
     def _place_attendee_name(self, strings):
-        strings.append(f"<RC440,65><{self._ttf_font},8>{self._ns.profile.name}")
+        strings.append(
+            f"<RC440,65><{self._ttf_font},8>{self._ns.profile.name}")
 
     def _place_price(self, strings):
         strings.append(f"<RC365,65>{self._ns.costs.gross.display}")
@@ -123,7 +128,8 @@ class TaiwanAcrobaticTroupeTicket(Ticket):
             roff += 60
 
     def _place_org_title(self, strings):
-        strings.append(f"<RC0,65><{self._ttf_font},8>{self._ev_details.org_title}")
+        strings.append(
+            f"<RC0,65><{self._ttf_font},8>{self._ev_details.org_title}")
 
     def build_boca_script(self) -> str:
         """ return fgl_script string """
@@ -145,3 +151,13 @@ class TaiwanAcrobaticTroupeTicket(Ticket):
                 updated_fgl_cmds.append(updated_cmd)
 
         return ''.join(updated_fgl_cmds)
+
+
+class CircusArtTicket(TaiwanAcrobaticTroupeTicket):
+    """ FOCA """
+    EVENTID = "859649002307"
+
+
+class TaiwanPulseTicket(TaiwanAcrobaticTroupeTicket):
+    """ Taiwan Pulse 2025 """
+    EVENTID = "1292046719519"

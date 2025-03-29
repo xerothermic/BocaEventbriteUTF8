@@ -1,9 +1,10 @@
 from datetime import datetime
 from types import SimpleNamespace
+from tagswa.boca_printer import BocaNullPrinter
 from tagswa.abstraction.ticket import Ticket
 from tagswa.abstraction.eventbrite import CommonEventFields
-from tagswa.boca_printer import BocaTcpPrinter, BocaNullPrinter
-from tagswa.acrobatic_ticket import TaiwanAcrobaticTroupeTicket
+from tagswa.meydenbauer_ticket import TaiwanAcrobaticTroupeTicket
+
 
 def test_split_long_line1():
     """ contiguous long line without space """
@@ -12,12 +13,14 @@ def test_split_long_line1():
     assert len(lines) == 1
     assert lines[0] == test_str
 
+
 def test_split_short_line1():
     """ contiguous short line without space """
     test_str = "01" * 5
     lines = Ticket.split_long_line(test_str, 16)
     assert len(lines) == 1
     assert lines[0] == test_str
+
 
 def test_split_long_line2():
     """ long line with spaces """
@@ -27,6 +30,7 @@ def test_split_long_line2():
     assert lines[0] == ("01 " * 5).rstrip()
     assert lines[3] == ("01 " * 5).rstrip()
 
+
 def test_split_short_line2():
     """ short line with spaces """
     test_str = "01 " * 4
@@ -34,18 +38,20 @@ def test_split_short_line2():
     assert len(lines) == 1
     assert lines[0] == test_str
 
+
 def test_split_long_short_line():
     """ long line without space + long line with spaces """
     test_str_long = "0" * 18
     test_str = test_str_long
     test_str += " "
-    test_str += "01 " * 8 
+    test_str += "01 " * 8
     lines = Ticket.split_long_line(test_str, 16)
     assert len(lines) == 3
     assert lines[0] == test_str_long
     assert lines[1] == ("01 " * 5).rstrip()
-    assert lines[2] != "01 " * 3 # trailing space is dropped in returned line
+    assert lines[2] != "01 " * 3  # trailing space is dropped in returned line
     assert lines[2] == ("01 " * 3).rstrip()
+
 
 def test_split_ticket_class_name():
     test_str = 'TICKET CLASS NAME:'+'01 '*7
@@ -54,13 +60,14 @@ def test_split_ticket_class_name():
     assert lines[0] == 'TICKET CLASS'
     assert lines[1].startswith('NAME:')
 
+
 def test_acrobatic_ticket_layout_null():
     """ Construct a dummy ticket with long"""
     ns = SimpleNamespace()
     ns.barcodes = [SimpleNamespace()]
     ns.barcodes[0].barcode = 'BARCODE:669179136910885398349001'
     ns.assigned_unit = SimpleNamespace()
-    ns.assigned_unit.pairs = ['01 '*2,'23 '*2,'34 '*2]
+    ns.assigned_unit.pairs = ['01 '*2, '23 '*2, '34 '*2]
     ns.ticket_class_name = 'TICKET CLASS NAME:'+'01 '*7
     ns.order_id = '6691791369'
     ns.ticket_description = None
@@ -81,6 +88,5 @@ def test_acrobatic_ticket_layout_null():
 
     fgl_str = ticket.build_boca_script()
     print(fgl_str)
-    printer = BocaTcpPrinter()
-    # printer = BocaNullPrinter()
+    printer = BocaNullPrinter()
     printer.print(fgl_str)
