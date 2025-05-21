@@ -1,8 +1,7 @@
 # Python enviornment setup
-- `conda create boca`
+- `conda create -n boca`
 - `conda activate boca`
-- conda install pip
-- conda install click
+- conda install pip click
 - pip install eventbrite
 
 # Setup Eventbrite API key
