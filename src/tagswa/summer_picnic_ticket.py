@@ -1,27 +1,23 @@
 import re
-from types import SimpleNamespace
 import logging
 
 logger = logging.getLogger(__name__)
 
-from tagswa.abstraction.eventbrite import CommonEventFields
+from tagswa.abstraction.event import CommonEventFields
+from tagswa.abstraction.eventbrite import EventbriteAttendee
 from tagswa.abstraction.ticket import Ticket
 
 class SummerPicnic2023Ticket(Ticket):
     """ Summer picnic event """
     EVENTID = "675702834367"
+    ORG_TITLE = "TAGS"
+    VENUE_TITLE = "Marymoor Park"
+    VENUE_ADDR = "Redmond, WA"
 
-    def __init__(self, ns: SimpleNamespace, evf: CommonEventFields, ttf_font: str = "TTF1"):
-        # TODO: construct and pass-in attendee obj, so missing field can be captured early.
-        if self._missing_required_fields(ns):
-            raise ValueError("missing fields")
-        self._ns = ns
+    def __init__(self, attendee: EventbriteAttendee, evf: CommonEventFields, ttf_font: str = "TTF1"):
+        self._attendee = attendee
         self._ev_details = evf
         self._ttf_font = ttf_font
-
-    @staticmethod
-    def _missing_required_fields(ns: SimpleNamespace):
-        return False
 
     def _gen_fgl_script_from_ns(self):
         strings = []
@@ -51,35 +47,35 @@ class SummerPicnic2023Ticket(Ticket):
         strings.append("<HW2,2><SP275,1250><LD9>")
 
     def _place_barcode(self, strings):
-        strings.append("<RC200,1550><QR5>"+"{"+str(self._ns.barcodes[0].barcode)+"}")
-        strings.append(f"<RC440,1550><F2>{self._ns.barcodes[0].barcode}")
+        strings.append("<RC200,1550><QR5>"+"{"+self._attendee.barcode+"}")
+        strings.append(f"<RC440,1550><F2>{self._attendee.barcode}")
 
     def _place_ticket_class(self, strings):
         roff = 10
         strings.append(f"<{self._ttf_font},8>")
 
-        for l in Ticket.split_long_line(self._ns.ticket_class_name, char_per_line=16):
+        for l in Ticket.split_long_line(self._attendee.ticket_class_name, char_per_line=16):
             roff += 30
             strings.append(f"<RC{roff},1500>{l}")
 
     def _place_order_id(self, strings):
         # start again from the top row
         strings.append("<F3>")
-        strings.append(f"<RC0,1200>#{self._ns.order_id}")
+        strings.append(f"<RC0,1200>#{self._attendee.order_id}")
         strings.append("<F3>")
-        strings.append(f"<RC0,1500>#{self._ns.order_id}")
+        strings.append(f"<RC0,1500>#{self._attendee.order_id}")
 
     def _place_ticket_description(self, strings):
-        if not self._ns.ticket_description:
+        if not self._attendee.ticket_description:
             return
 
-        strings.append(f"<RC390,235><{self._ttf_font},8>{self._ns.ticket_description}")
+        strings.append(f"<RC390,235><{self._ttf_font},8>{self._attendee.ticket_description}")
 
     def _place_attendee_name(self, strings):
-        strings.append(f"<RC480,65><{self._ttf_font},8>{self._ns.profile.name}")
+        strings.append(f"<RC480,65><{self._ttf_font},8>{self._attendee.profile_name}")
 
     def _place_price(self, strings):
-        strings.append(f"<RC365,65>{self._ns.costs.gross.display}")
+        strings.append(f"<RC365,65>{self._attendee.price_display}")
 
     def _place_event_time(self, strings):
         strings.append("<RC315,65>{0} - {1}".format(
@@ -88,8 +84,8 @@ class SummerPicnic2023Ticket(Ticket):
 
     def _place_venue_info(self, strings):
         strings.append("<F3>")
-        strings.append(f"<RC215,65>{self._ev_details.venue_title}")
-        strings.append(f"<RC265,65>{self._ev_details.venue_addr}")
+        strings.append(f"<RC215,65>{self.VENUE_TITLE}")
+        strings.append(f"<RC265,65>{self.VENUE_ADDR}")
 
     def _place_event_title(self, strings):
         roff = 70
@@ -106,7 +102,7 @@ class SummerPicnic2023Ticket(Ticket):
             roff += 60
 
     def _place_org_title(self, strings):
-        strings.append(f"<RC0,65><{self._ttf_font},9>{self._ev_details.org_title}")
+        strings.append(f"<RC0,65><{self._ttf_font},9>{self.ORG_TITLE}")
 
     def build_boca_script(self) -> str:
         """ return fgl_script string """
@@ -117,7 +113,7 @@ class SummerPicnic2023Ticket(Ticket):
     def _debug_boca_script_offsets(self) -> str:
         fgl_cmds = self._gen_fgl_script_from_ns()
         updated_fgl_cmds = []
-        p = re.compile('<RC(\d+),(\d+)>(.*)')
+        p = re.compile(r'<RC(\d+),(\d+)>(.*)')
         for cmd in fgl_cmds:
             m = p.search(cmd)
             if not m:

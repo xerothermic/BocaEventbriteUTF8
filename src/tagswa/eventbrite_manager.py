@@ -4,8 +4,8 @@ from typing import Iterator
 from eventbrite import Eventbrite
 import logging
 import os
-from types import SimpleNamespace
-from tagswa.abstraction.eventbrite import CommonEventFields
+from tagswa.abstraction.event import CommonEventFields
+from tagswa.abstraction.eventbrite import EventbriteAttendee
 
 from data_model import gen_obj
 
@@ -34,7 +34,7 @@ class EventbriteManager(object):
     def _get_attendee_by_id(self, event_id, attendee_id):
         return self._conn.get(f'/events/{event_id}/attendees/{attendee_id}/', {'expand': 'assigned_unit'})
 
-    def get_attendees_by_order_id(self, order_id: int, unused_only: bool = True) -> Iterator[SimpleNamespace]:
+    def get_attendees_by_order_id(self, order_id: int, unused_only: bool = True) -> Iterator[EventbriteAttendee]:
         resp = self._conn.get(f'/orders/{order_id}/', {'expand': 'attendees'})
         if 'attendees' not in resp: # type: ignore
             logger.warning('attendee is empty')
@@ -42,26 +42,23 @@ class EventbriteManager(object):
 
         attendees = self._filter_unused_attendees(unused_only, resp['attendees']) # type: ignore
         attendees_with_assigned_units = self._map_attendees_with_assigned_units(attendees)
-        yield from map(gen_obj, attendees_with_assigned_units)
+        yield from (EventbriteAttendee.from_attendee_api(gen_obj(a)) for a in attendees_with_assigned_units)
 
     def get_attendees_by_event_id(self, event_id: int, unused_only: bool = True):
         resp = self._conn.get(f'/events/{event_id}/attendees/', {'expand': 'assigned_unit'})
         pagination, attendees = resp['pagination'], resp['attendees'] # type: ignore
         attendees = self._map_attendees_with_assigned_units(self._filter_unused_attendees(unused_only, attendees))
-        yield from map(gen_obj, attendees)
+        yield from (EventbriteAttendee.from_attendee_api(gen_obj(a)) for a in attendees)
         while pagination['has_more_items']:
             resp = self._conn.get(f'/events/{event_id}/attendees/', {'continuation': pagination['continuation']})
             pagination, attendees = resp['pagination'], resp['attendees'] # type: ignore
             attendees = self._map_attendees_with_assigned_units(self._filter_unused_attendees(unused_only, attendees))
-            yield from map(gen_obj, attendees)
+            yield from (EventbriteAttendee.from_attendee_api(gen_obj(a)) for a in attendees)
 
     def get_event_detail(self, event_id: int):
         resp = gen_obj(self._conn.get(f'/events/{event_id}/', {'expand': 'venue,organizer'}))
         return CommonEventFields(
-            org_title=resp.organizer.name,
             event_title=resp.name.text,
-            venue_title=resp.venue.name,
-            venue_addr=resp.venue.address.localized_address_display,
             event_start_datetime=datetime.strptime(resp.start.local, '%Y-%m-%dT%H:%M:%S'),
             event_end_datetime=datetime.strptime(resp.end.local, '%Y-%m-%dT%H:%M:%S'),
         )

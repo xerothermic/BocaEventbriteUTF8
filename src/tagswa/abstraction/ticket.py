@@ -7,7 +7,7 @@ class Ticket(abc.ABC):
     @property
     @abc.abstractmethod
     def EVENTID(cls):
-        """ Eventbrite event id. Used to select derived ticket class. """
+        """ Platform event identifier. Used to select derived ticket class. """
         raise NotImplementedError
 
     @abc.abstractmethod
