@@ -189,6 +189,25 @@ def dimensions(dry_run, row_step, col_step, max_row, max_col):
     printer.print(script)
 
 
+@cli.command('download-logo')
+@click.option('--bmp', required=True, type=click.Path(exists=True), help='Path to 1-bit BMP file.')
+@click.option('--slot', required=True, type=int, help='Logo slot id (referenced as <LDn>).')
+def download_logo_cmd(bmp, slot):
+    """ Download a 1-bit BMP into a printer flash slot for later <LDn> recall """
+    printer = BocaTcpPrinter()
+    printer.download_logo(bmp, slot)
+
+
+@cli.command('print-logo-inline')
+@click.option('--bmp', required=True, type=click.Path(exists=True), help='Path to 1-bit BMP file.')
+@click.option('--row', default=0, help='Row position (dots).')
+@click.option('--col', default=0, help='Column position (dots).')
+def print_logo_inline_cmd(bmp, row, col):
+    """ Print a 1-bit BMP inline (no flash storage) for quick testing """
+    printer = BocaTcpPrinter()
+    printer.print_logo_inline(bmp, row, col)
+
+
 def _setup_boca_printer(dry_run):
     if dry_run:
         printer = BocaNullPrinter()

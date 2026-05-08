@@ -34,18 +34,36 @@ class BocaTcpPrinter(Boca):
         self._sock.sendall(fgl_script.encode())
         logger.info(f'Printed {fgl_script}')
 
-    def download_logo(self, logo_file_path: str):
-        """ download 1-bit bmp logo to Boca printer """
+    def print_logo_inline(self, logo_file_path: str, row: int = 0, col: int = 0):
+        """ Print a 1-bit BMP at (row, col) without storing it on the printer.
+
+        Sends <SP{row},{col}><bmp><G{size}>{bmp_bytes}<p>. Useful for quick
+        tests or one-off prints. For repeated use of the same logo, prefer
+        download_logo() + <LD{slot}> to avoid re-sending the bytes each time.
+        """
+        with open(logo_file_path, 'rb') as fp:
+            bmp = fp.read()
+        header = f'<SP{row},{col}><bmp><G{len(bmp)}>'.encode()
+        self._sock.sendall(header + bmp + b'<p>')
+        logger.info(f'Printed inline {logo_file_path} ({len(bmp)} bytes) at RC{row},{col}')
+
+    def download_logo(self, logo_file_path: str, logo_id: int):
+        """ Download a 1-bit BMP logo into slot logo_id on the printer.
+
+        After calling this, the logo can be referenced in FGL scripts via
+        <SP{row},{col}><LD{logo_id}>. The printer needs ~30 seconds to
+        commit the data to flash before the slot becomes usable. Monitor
+        the printer LCD panel and wait until it shows "DOWNLOAD OK!"
+        before issuing any <LD{logo_id}> recall.
+        """
         with open(logo_file_path, 'rb') as fp:
             logo = fp.read()
-            logger.info(f'{logo_file_path=} contain {len(logo)} bytes.')
-            print(f'{logo_file_path=} contain {len(logo)} bytes.')
+        logger.info(f'{logo_file_path=} ({len(logo)} bytes) -> slot {logo_id}')
 
-            esc = chr(27).encode()
-            self._sock.sendall(
-                esc + f'<bmp><G{len(logo)}>'.encode()+logo + esc)
-
-        print('Done')
+        esc = chr(27).encode()
+        self._sock.sendall(
+            esc + f'<ID{logo_id}><bmp><G{len(logo)}>'.encode() + logo + esc)
+        logger.info(f'Downloaded. Wait for printer LCD "DOWNLOAD OK!" before <LD{logo_id}>.')
 
     def download_ttf_font(self, ttf_file_path: str, file_id: int):
         """ download TTF font to Boca printer """

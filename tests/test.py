@@ -185,7 +185,7 @@ def test_scc_ticket_qr_url():
     ticket = SCCTicket(attendee, evf)
     fgl_str = ticket.build_boca_script()
 
-    assert '<QRV7><QR8>' in fgl_str
+    assert '<QRV7><QR6>' in fgl_str
     assert 'https://www.zeffy.com/ticket/bf4491cf-cbe9-4b65-9246-8ec4588f8f5a' in fgl_str
     assert 'Test User' in fgl_str
     assert '$20.00' in fgl_str
