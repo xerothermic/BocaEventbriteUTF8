@@ -161,6 +161,34 @@ def zeffy(payment_id, ticket_id, search, dry_run, first_n, skip_n, ttf_font):
         printer.print(ticket.build_boca_script())
 
 
+@cli.command()
+@click.option('--dry-run', is_flag=True, default=False, help='Dry run only, no printing.')
+@click.option('--row-step', default=50, help='Row marker spacing in dots.')
+@click.option('--col-step', default=100, help='Column marker spacing in dots.')
+@click.option('--max-row', default=600, help='Maximum row to mark.')
+@click.option('--max-col', default=2000, help='Maximum column to mark.')
+def dimensions(dry_run, row_step, col_step, max_row, max_col):
+    """ Print a coordinate grid for measuring layout dimensions """
+    fgl = []
+    # Horizontal grid lines + row markers at col 0 (long side) and col 1500 (stub side)
+    for row in range(0, max_row + 1, row_step):
+        fgl.append(f'<RC{row},0><HX{max_col}>')
+        fgl.append(f'<RC{row},0><F2>{row}')
+        fgl.append(f'<RC{row},1500><F2>{row}')
+    # Vertical grid lines + column markers at top and bottom
+    bottom_row = max_row - row_step // 2
+    for col in range(0, max_col + 1, col_step):
+        fgl.append(f'<RC0,{col}><VX{max_row}>')
+        fgl.append(f'<RC0,{col}><F2>{col}')
+        fgl.append(f'<RC{bottom_row},{col}><F2>{col}')
+    fgl.append('<p>')
+    script = ''.join(fgl)
+
+    printer = _setup_boca_printer(dry_run)
+    logger.info("Printing dimension grid")
+    printer.print(script)
+
+
 def _setup_boca_printer(dry_run):
     if dry_run:
         printer = BocaNullPrinter()
